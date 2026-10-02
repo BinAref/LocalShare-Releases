@@ -1,0 +1,386 @@
+/* LocalShare: download page.
+   Palette and surfaces track the app's own tokens so the two read as one
+   product. Navy-slate neutrals, and one accent: the green of a live
+   connection, the same as the app and its icon. */
+
+:root {
+  --ink: #0F172A;
+  --ink-2: #475569;
+  --ink-3: #5B6779; /* fine print is text: 4.5:1 on every surface */
+  --paper: #F5F7FA;
+  --card: #FFFFFF;
+  --sunk: #EDF1F6;
+  --edge: #E2E8F0;
+  --edge-firm: #CBD5E1;
+  --signal: #047857;
+  --signal-deep: #065F46;
+  --signal-wash: #E3F5EE;
+  --on-signal: #FFFFFF;
+  --good: #047857;
+  --shade: rgba(15, 23, 42, .18);
+
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 18px;
+
+  --gutter: clamp(20px, 5vw, 56px);
+  --measure: 1120px;
+
+  --sans: "Readex Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --arabic: "Readex Pro", "Segoe UI", "Geeza Pro", sans-serif;
+  --urdu: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #F1F5F9;
+    --ink-2: #A9B6CA;
+    --ink-3: #8D9AB0;
+    --paper: #0A1020;
+    --card: #111A2C;
+    --sunk: #0D1526;
+    --edge: #22304A;
+    --edge-firm: #33435F;
+    --signal: #34D399;
+    --signal-deep: #6EE7B7;
+    --signal-wash: #0F2E26;
+    --on-signal: #052E22;
+    --good: #34D399;
+    --shade: rgba(2, 6, 23, .55);
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #F1F5F9;
+  --ink-2: #A9B6CA;
+  --ink-3: #8D9AB0;
+  --paper: #0A1020;
+  --card: #111A2C;
+  --sunk: #0D1526;
+  --edge: #22304A;
+  --edge-firm: #33435F;
+  --signal: #34D399;
+  --signal-deep: #6EE7B7;
+  --signal-wash: #0F2E26;
+  --on-signal: #052E22;
+  --good: #34D399;
+  --shade: rgba(2, 6, 23, .55);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+html[lang="ar"] body { font-family: var(--arabic); line-height: 1.8; }
+html[lang="ur"] body { font-family: var(--urdu); line-height: 2.1; }
+
+a { color: var(--signal); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--signal-deep); }
+h1, h2 { margin: 0; font-weight: 600; letter-spacing: -0.021em; }
+html[dir="rtl"] h1, html[dir="rtl"] h2 { letter-spacing: 0; }
+p { margin: 0; }
+[hidden] { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ── bar ─────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  /* Flex items never shrink below min-content, and the language switcher
+     plus the controls are wider than a phone, so the bar must be allowed
+     to wrap rather than push the whole page sideways. */
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 18px var(--gutter);
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 17px;
+}
+.mark img { border-radius: 7px; }
+.bar-end { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-inline-start: auto; }
+
+/* Native selects: one control each for language and theme, so adding a
+   language or a theme does not add a button to the bar. The visible label
+   sits above on wide screens and is hidden on phones, where the chosen
+   value alone is enough. */
+.pick { display: inline-flex; flex-direction: column; gap: 2px; }
+.pick-label {
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink-3);
+  padding-inline-start: 2px;
+}
+.pick-select {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-sm);
+  padding: 6px 28px 6px 10px;
+  cursor: pointer;
+  appearance: none;
+  /* A single chevron, stroked in currentColor so it follows the theme. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23777f8c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 10px 7px;
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+}
+html[dir="rtl"] .pick-select {
+  padding: 6px 10px 6px 28px;
+  background-position: left 10px center;
+}
+.pick-select:hover { border-color: var(--edge-firm); }
+.pick-select option { background: var(--card); color: var(--ink); }
+
+.ghost {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink-2);
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.5;
+}
+.ghost:hover { border-color: var(--edge-firm); color: var(--ink); }
+@media (max-width: 620px) {
+  .pick-label { display: none; }
+}
+
+/* ── hero ────────────────────────────────────────────────────── */
+
+main { max-width: var(--measure); margin: 0 auto; padding: 0 var(--gutter); }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 330px);
+  gap: clamp(28px, 6vw, 80px);
+  align-items: center;
+  padding: clamp(28px, 5vw, 56px) 0 clamp(32px, 5vw, 56px);
+}
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; gap: 40px; }
+}
+
+h1 {
+  font-size: clamp(33px, 5.6vw, 53px);
+  line-height: 1.04;
+  max-width: min(19ch, 100%);
+  text-wrap: balance;
+}
+html[dir="rtl"] h1 { line-height: 1.3; max-width: min(22ch, 100%); }
+/* Nastaliq descends steeply between lines, so it needs more leading than
+   Naskh before the strokes of one line reach into the next. */
+html[lang="ur"] h1 { line-height: 1.75; }
+html[lang="ur"] h2 { line-height: 1.6; }
+
+.say {
+  margin-top: 18px;
+  font-size: clamp(17px, 1.6vw, 19px);
+  color: var(--ink-2);
+  max-width: min(44ch, 100%);
+}
+
+/* the one bold element */
+.get { margin-top: clamp(26px, 4vw, 38px); }
+
+.action {
+  display: block;
+  background: var(--signal);
+  color: var(--on-signal);
+  text-decoration: none;
+  border-radius: var(--r-lg);
+  padding: 17px 24px;
+  max-width: min(25rem, 100%);
+  transition: background 120ms ease, transform 80ms ease;
+}
+.action:hover { background: var(--signal-deep); color: var(--on-signal); }
+.action:active { transform: translateY(1px); }
+.action-line { display: block; font-size: 19px; font-weight: 600; letter-spacing: -0.012em; }
+.action-sub { display: block; margin-top: 2px; font-size: 14.5px; opacity: 0.82; }
+
+.after {
+  margin-top: 12px;
+  max-width: min(25rem, 100%);
+  font-size: 14.5px;
+  color: var(--ink-2);
+  background: var(--signal-wash);
+  border-radius: var(--r);
+  padding: 11px 14px;
+}
+
+.alts { margin-top: 14px; font-size: 15px; color: var(--ink-3); }
+.alts a { color: var(--ink-2); }
+.alts a:hover { color: var(--signal); }
+
+/* The app itself, as a phone shows it, with the QR laid over its corner:
+   the picture says what it is, the code gets it onto a phone. */
+.hero-show { position: relative; justify-self: end; width: min(330px, 100%); }
+@media (max-width: 860px) { .hero-show { justify-self: start; width: min(300px, 100%); } }
+.phone {
+  margin: 0;
+  padding: 7px;
+  border-radius: 38px;
+  background: #0A1020;
+  border: 1px solid var(--edge-firm);
+  box-shadow: 0 40px 70px -30px var(--shade), 0 2px 6px var(--shade);
+}
+.phone img { display: block; width: 100%; height: auto; border-radius: 31px; }
+
+.qr-float {
+  position: absolute;
+  inset-inline-start: -88px;
+  bottom: 36px;
+  width: 172px;
+  padding: 12px 12px 10px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--edge);
+  box-shadow: 0 18px 40px -16px var(--shade);
+}
+.qr { background: #FFFFFF; border-radius: 10px; padding: 8px; color: #0F172A; aspect-ratio: 1; }
+.qr svg { display: block; width: 100%; height: 100%; }
+.qr-say { margin-top: 8px; font-size: 13px; line-height: 1.4; color: var(--ink-3); }
+/* A phone is where the download goes already; a code to scan is for a
+   bigger screen. */
+@media (max-width: 860px) { .qr-float { display: none; } }
+
+/* ── screens ─────────────────────────────────────────────────── */
+
+.screen-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 3.5vw, 44px);
+  align-items: start;
+  padding-top: 28px;
+}
+.screen { margin: 0; }
+.screen.raised { transform: translateY(-28px); }
+.screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+  border: 1px solid var(--edge-firm);
+  box-shadow: 0 30px 60px -32px var(--shade);
+}
+.screen figcaption { margin-top: 14px; font-size: 15.5px; color: var(--ink-2); max-width: 30ch; }
+@media (max-width: 760px) {
+  .screen-strip {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 8px 2px 14px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .screen-strip::-webkit-scrollbar { display: none; }
+  .screen { flex: 0 0 68%; scroll-snap-align: start; }
+  .screen.raised { transform: none; }
+}
+
+/* ── spec sheet: the page's information backbone ─────────────── */
+
+section + section { margin-top: clamp(40px, 6vw, 68px); }
+section h2 {
+  font-size: clamp(21px, 2.4vw, 26px);
+  margin-bottom: 20px;
+}
+
+.rows { margin: 0; border-top: 1px solid var(--edge); }
+.rows > div {
+  display: grid;
+  grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr);
+  gap: 8px 28px;
+  padding: 15px 2px;
+  border-bottom: 1px solid var(--edge);
+  align-items: baseline;
+}
+.rows dt { color: var(--ink-3); font-size: 15.5px; }
+.rows dd { margin: 0; color: var(--ink); }
+.rows dd b { font-weight: 600; }
+@media (max-width: 660px) {
+  .rows > div { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 13px 2px; }
+}
+
+/* ── builds ──────────────────────────────────────────────────── */
+
+.build-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--edge); }
+.build-list li { border-bottom: 1px solid var(--edge); }
+.build-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 2px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.build-row:hover { color: var(--signal); }
+.build-row:hover .build-name { text-decoration: underline; text-underline-offset: 3px; }
+.build-os { flex: 1 1 auto; min-width: 0; }
+.build-name { display: block; font-weight: 500; }
+.build-note { display: block; font-size: 14.5px; color: var(--ink-3); }
+.build-size { flex: 0 0 auto; font-size: 15px; color: var(--ink-3); }
+.build-list li[data-soon] .build-row { color: var(--ink-3); pointer-events: none; }
+
+.fine { margin-top: 18px; font-size: 15px; color: var(--ink-3); max-width: min(62ch, 100%); }
+
+/* ── claims ──────────────────────────────────────────────────── */
+
+.claim-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; max-width: min(64ch, 100%); }
+.claim-list li { position: relative; padding-inline-start: 28px; color: var(--ink-2); }
+.claim-list li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.62em;
+  width: 11px;
+  height: 6px;
+  border-inline-start: 2px solid var(--good);
+  border-bottom: 2px solid var(--good);
+  transform: rotate(-45deg);
+}
+html[dir="rtl"] .claim-list li::before { transform: rotate(45deg) scaleX(-1); }
+
+/* ── foot ────────────────────────────────────────────────────── */
+
+.foot {
+  max-width: var(--measure);
+  margin: clamp(56px, 9vw, 104px) auto 0;
+  padding: 24px var(--gutter) 40px;
+  border-top: 1px solid var(--edge);
+  font-size: 15px;
+  color: var(--ink-3);
+}
+.foot p { display: flex; gap: 10px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
