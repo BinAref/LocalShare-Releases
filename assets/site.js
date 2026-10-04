@@ -8,12 +8,16 @@
 (() => {
   'use strict';
 
-  const REPO = 'https://github.com/BinAref/LocalShare-Releases';
-  const DL = `${REPO}/releases/latest/download`;
+  /* Downloads come from binaref.com, which streams them from a private
+     store: the address a visitor copies is the site's, and the newest copy
+     of a file is always the one served. The source repository is private, so
+     its own release links never reached a visitor in the first place. */
+  const DL = 'https://binaref.com/dl/localshare';
+  const PAGE = 'https://binaref.com/projects/localshare';
   const VERSION = '1.5.1';
 
-  /* Assets carry no version in their names, so `releases/latest/download`
-     keeps working after every future release. */
+  /* Assets carry no version in their names, so the same address keeps
+     working after every future release. Windows gets its installer only. */
   const BUILDS = {
     android:     { file: 'LocalShare.apk',                mb: '82 MB' },
     androidArm64:{ file: 'LocalShare-arm64-v8a.apk',       mb: '31 MB' },
@@ -22,7 +26,6 @@
     windows:     { file: 'LocalShare-windows-x64-setup.exe', mb: '12 MB' },
     macos:       { file: 'LocalShare-macos.zip',           mb: '23 MB' },
     linux:       { file: 'LocalShare-linux-x64.deb',       mb: '15 MB' },
-    windowsZip:  { file: 'LocalShare-windows-x64.zip',     mb: '14 MB' },
     linuxTar:    { file: 'LocalShare-linux-x64.tar.gz',    mb: '18 MB' },
   };
 
@@ -445,7 +448,7 @@
     } else {
       // Unknown platform, or one with no published build: send them to the
       // full list rather than hand over a file that will not run.
-      a.href = `${REPO}/releases/latest`;
+      a.href = PAGE;
       a.removeAttribute('download');
       label.textContent = t.getUnknown;
       sub.textContent = HERE
@@ -498,10 +501,8 @@
       ['macos', BUILDS.macos],
       ['linux', BUILDS.linux],
       ['ios', null],
-      // The archives come last. They exist for the cases the packages do not
-      // cover — a machine where nothing may be installed, and every Linux
-      // that is not Debian-derived.
-      ['windowsZip', BUILDS.windowsZip],
+      // The archive comes last. It exists for what the package does not
+      // cover: every Linux that is not Debian-derived.
       ['linuxTar', BUILDS.linuxTar],
     ];
     const ul = $('build-list');
