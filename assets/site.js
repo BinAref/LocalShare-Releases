@@ -14,7 +14,7 @@
      its own release links never reached a visitor in the first place. */
   const DL = 'https://binaref.com/dl/localshare';
   const PAGE = 'https://binaref.com/projects/localshare';
-  const VERSION = '1.5.1';
+  const VERSION = '1.5.2';
 
   /* Assets carry no version in their names, so the same address keeps
      working after every future release. Windows gets its installer only. */
